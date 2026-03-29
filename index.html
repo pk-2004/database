@@ -3,47 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprehensive Simulation Database</title>
+    <title>FaSTMM and MSTMM Runs</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
     <style>
-        body { background-color: #f4f7f9; font-family: 'Inter', sans-serif; padding: 40px; }
-        .card { border-radius: 12px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        .method-badge { font-weight: 700; padding: 6px 14px; border-radius: 30px; font-size: 0.75rem; text-transform: uppercase; }
-        .fastmm { background-color: #d1e7ff; color: #0056b3; }
-        .mstmm { background-color: #fff3cd; color: #856404; }
-        .table thead { background-color: #f8f9fa; border-bottom: 2px solid #e9ecef; }
-        .material-name { font-weight: 500; color: #333; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; padding: 40px; }
+        .card { border-radius: 16px; border: none; box-shadow: 0 4px 30px rgba(0,0,0,0.05); background: white; }
+        .method-badge { font-weight: 700; padding: 6px 14px; border-radius: 20px; font-size: 0.7rem; text-transform: uppercase; min-width: 80px; display: inline-block; text-align: center; }
+        .fastmm { background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .mstmm { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .table thead { background-color: #f1f5f9; color: #475569; font-size: 0.85rem; border-bottom: 2px solid #e2e8f0; }
+        .file-link { font-family: monospace; font-size: 0.82rem; color: #2563eb; text-decoration: none; background: #f0f9ff; padding: 4px 10px; border-radius: 6px; border: 1px solid #e0f2fe; display: inline-flex; align-items: center; gap: 5px; }
+        .file-link:hover { background: #e0f2fe; color: #1e40af; }
+        .dataTables_length, .dataTables_paginate { display: none !important; }
     </style>
 </head>
 <body>
 
-<div class="card p-4 bg-white">
+<div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-1 text-primary">🔬 Simulation Results</h2>
-            <p class="text-muted small mb-0">Unified view of FaSTMM & MSTMM performance metrics.</p>
+            <h1 class="h3 fw-bold text-slate-900 mb-0">🔬 FaSTMM and MSTMM Runs</h1>
         </div>
-        <div class="text-end">
-            <span class="badge bg-secondary">Total Records: 72</span>
-        </div>
+
     </div>
-    
-    <table id="resultsTable" class="table table-hover align-middle" style="width:100%">
-        <thead>
-            <tr>
-                <th>Method</th>
-                <th>Material</th>
-                <th>Particles (N)</th>
-                <th>Time (s)</th>
-                <th>RAM Used (GB)</th>
-                <th>Machine</th>
-                <th>Threads/Tasks</th>
-                <th>Wave #</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
+
+    <div class="card p-4">
+        <table id="simTable" class="table table-hover align-middle" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Material</th>
+                    <th>Size (μm)</th>
+                    <th>Particles (N)</th>
+                    <th>Time (s)</th>
+                    <th>RAM (GB)</th>
+                    <th>Machine</th>
+                    <th>Processes (MSTMM)/ CPU Threads (FaSTMM)</th>
+                    <th>Output File</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
@@ -51,34 +55,78 @@
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
-    // Embedded JSON data including MSTMM records
-    const fullData = [{"Method": "FaSTMM", "Material": "Ice", "Particles": "16384", "Time_s": "211", "RAM_GB": "2.9 GBs", "Machine": "Zaratan", "Threads_Tasks": "64", "Wave_Num": "10"}, {"Method": "FaSTMM", "Material": "Ice", "Particles": "16384", "Time_s": "11220", "RAM_GB": "2.9 GBs", "Machine": "Zaratan", "Threads_Tasks": "64", "Wave_Num": "10"}, {"Method": "FaSTMM", "Material": "Ice", "Particles": "8192", "Time_s": "1398", "RAM_GB": "2.9 GBs", "Machine": "Zaratan", "Threads_Tasks": "64", "Wave_Num": "10"}, {"Method": "FaSTMM", "Material": "Ice", "Particles": "8192", "Time_s": "4755", "RAM_GB": "2.9 GB", "Machine": "Zaratan", "Threads_Tasks": "64", "Wave_Num": "10"}, {"Method": "FaSTMM", "Material": "Ice", "Particles": "1638", "Time_s": "1427", "RAM_GB": "0.39 GB", "Machine": "Zaratan", "Threads_Tasks": "20", "Wave_Num": "10"}, {"Method": "MSTMM", "Material": "Water Ice", "Particles": "8192", "Time_s": "14640", "RAM_GB": "407 GB", "Machine": "Zaratan", "Threads_Tasks": "384", "Wave_Num": "N/A"}, {"Method": "MSTMM", "Material": "Water Ice", "Particles": "16384", "Time_s": "162544", "RAM_GB": "770 GB", "Machine": "Zaratan", "Threads_Tasks": "384", "Wave_Num": "N/A"}, {"Method": "MSTMM", "Material": "Ice", "Particles": "1638", "Time_s": "1180", "RAM_GB": "0.85 GB", "Machine": "Zaratan", "Threads_Tasks": "1", "Wave_Num": "N/A"}, {"Method": "FaSTMM", "Material": "Pyroxene", "Particles": "16384", "Time_s": "744", "RAM_GB": "2.9 GBs", "Machine": "Zaratan", "Threads_Tasks": "64", "Wave_Num": "10"}, {"Method": "FaSTMM", "Material": "Pyroxene", "Particles": "8192", "Time_s": "12428", "RAM_GB": "3.3 GB", "Machine": "Zaratan", "Threads_Tasks": "64", "Wave_Num": "10"}, {"Method": "MSTMM", "Material": "Iron Rich Pyroxene", "Particles": "8192", "Time_s": "1895", "RAM_GB": "896 GB", "Machine": "Zaratan", "Threads_Tasks": "384", "Wave_Num": "N/A"}, {"Method": "MSTMM", "Material": "Iron Rich Pyroxene", "Particles": "16384", "Time_s": "63758", "RAM_GB": "186 GB", "Machine": "Zaratan", "Threads_Tasks": "384", "Wave_Num": "N/A"}, {"Method": "MSTMM", "Material": "Iron Rich Pyroxene", "Particles": "17559", "Time_s": "16312", "RAM_GB": "13.77 GB", "Machine": "Zaratan", "Threads_Tasks": "200", "Wave_Num": "N/A"}, {"Method": "MSTMM", "Material": "Iron Rich Pyroxene", "Particles": "23170", "Time_s": "43716", "RAM_GB": "17.95 GB", "Machine": "Zaratan", "Threads_Tasks": "100", "Wave_Num": "N/A"}, {"Method": "FaSTMM", "Material": "Amorphous Carbon", "Particles": "16384", "Time_s": "21240", "RAM_GB": "5.1 GB", "Machine": "Zaratan", "Threads_Tasks": "64", "Wave_Num": "10"}, {"Method": "FaSTMM", "Material": "Amorphous Carbon", "Particles": "16384", "Time_s": "321", "RAM_GB": "2.8 GB", "Machine": "Zaratan", "Threads_Tasks": "64", "Wave_Num": "10"}, {"Method": "FaSTMM", "Material": "Amorphous Carbon", "Particles": "8192", "Time_s": "8873", "RAM_GB": "2.9 GB", "Machine": "Zaratan", "Threads_Tasks": "64", "Wave_Num": "10"}, {"Method": "FaSTMM", "Material": "Amorphous Carbon", "Particles": "1638", "Time_s": "2692", "RAM_GB": "0.39 GB", "Machine": "Zaratan", "Threads_Tasks": "20", "Wave_Num": "10"}, {"Method": "MSTMM", "Material": "Amporphous Carbon", "Particles": "8192", "Time_s": "1605", "RAM_GB": "896 GB", "Machine": "Zaratan", "Threads_Tasks": "384", "Wave_Num": "N/A"}, {"Method": "MSTMM", "Material": "Amporphous Carbon", "Particles": "16384", "Time_s": "63552", "RAM_GB": "186 GB", "Machine": "Zaratan", "Threads_Tasks": "384", "Wave_Num": "N/A"}, {"Method": "MSTMM", "Material": "Amorphous Carbon", "Particles": "1638", "Time_s": "6151", "RAM_GB": "1.75 GB", "Machine": "Zaratan", "Threads_Tasks": "1", "Wave_Num": "N/A"}, {"Method": "MSTMM", "Material": "Amporphous Silicate ", "Particles": "8192", "Time_s": "32813", "RAM_GB": "96.7 GB", "Machine": "Zaratan", "Threads_Tasks": "384", "Wave_Num": "N/A"}, {"Method": "MSTMM", "Material": "Amporphous Silicate ", "Particles": "8192", "Time_s": "2138", "RAM_GB": "894 GB", "Machine": "Zaratan", "Threads_Tasks": "384", "Wave_Num": "N/A"}, {"Method": "FaSTMM", "Material": "Halley Dust", "Particles": "1638", "Time_s": "1111", "RAM_GB": "0.37", "Machine": "Zaratan", "Threads_Tasks": "10", "Wave_Num": "64"}, {"Method": "FaSTMM", "Material": "Halley Dust", "Particles": "16384", "Time_s": "1111", "RAM_GB": "3.7", "Machine": "Zaratan", "Threads_Tasks": "64", "Wave_Num": "64"}, {"Method": "MSTMM", "Material": "Halley Dust", "Particles": "1638", "Time_s": "5739", "RAM_GB": "1.7 GB", "Machine": "Zaratan", "Threads_Tasks": "1", "Wave_Num": "N/A"}, {"Method": "MSTMM", "Material": "Hailey Dust", "Particles": "8192`", "Time_s": "164523", "RAM_GB": "8.03 GB", "Machine": "Zaratan", "Threads_Tasks": "1", "Wave_Num": "N/A"}, {"Method": "FaSTMM", "Material": "Iron", "Particles": "1638", "Time_s": "1931", "RAM_GB": "0.42 GB", "Machine": "Zaratan", "Threads_Tasks": "20", "Wave_Num": "10"}, {"Method": "FaSTMM", "Material": "Iron", "Particles": "16384", "Time_s": "10232", "RAM_GB": "3.7 GB", "Machine": "Zaratan", "Threads_Tasks": "64", "Wave_Num": "10"}, {"Method": "FaSTMM", "Material": "Iron", "Particles": "8192", "Time_s": "8116", "RAM_GB": "1.92 GB", "Machine": "Zaratan", "Threads_Tasks": "64", "Wave_Num": "10"}, {"Method": "MSTMM", "Material": "Iron", "Particles": "1638", "Time_s": "11955", "RAM_GB": "1.75 GB", "Machine": "Zaratan", "Threads_Tasks": "1", "Wave_Num": "N/A"}, {"Method": "MSTMM", "Material": "Iron", "Particles": "8192", "Time_s": "192441", "RAM_GB": "8 GB", "Machine": "Zaratan", "Threads_Tasks": "1", "Wave_Num": "N/A"}, {"Method": "MSTMM", "Material": "Iron", "Particles": "16384", "Time_s": "163447", "RAM_GB": "14.45 GB", "Machine": "Zaratan", "Threads_Tasks": "1", "Wave_Num": "N/A"}];
-    // This array contains a clean sample of all extracted MSTMM and FaSTMM records.
+    const simData = [
+        /* ICE */
+        {"Method": "FaSTMM", "Material": "Ice", "Size": "0.1", "Particles": "1638", "Time": "1427", "RAM": "0.39 GB", "Machine": "Zaratan", "Threads": "20", "File": "ice_01size_1k_10cpu_64ave_output.h5"},
+        {"Method": "FaSTMM", "Material": "Ice", "Size": "0.1", "Particles": "8192", "Time": "4755", "RAM": "2.9 GB", "Machine": "Zaratan", "Threads": "64", "File": "ice_01size_8k_10cpu_64ave_output.h5"},
+        {"Method": "FaSTMM", "Material": "Ice", "Size": "0.1", "Particles": "16384", "Time": "211", "RAM": "2.9 GBs", "Machine": "Zaratan", "Threads": "64", "File": "ice_01size_16k_64cpu_64ave_output.h5"},
+        {"Method": "FaSTMM", "Material": "Ice", "Size": "0.1", "Particles": "16384", "Time": "11220", "RAM": "2.9 GBs", "Machine": "Zaratan", "Threads": "64", "File": "ice_01size_16k_64cpu_64ave_output.h5"},
+        {"Method": "MSTMM", "Material": "Ice", "Size": "N/A", "Particles": "1638", "Time": "1180", "RAM": "0.85 GB", "Machine": "Zaratan", "Threads": "1", "File": "ice_64_1638.dat"},
+        {"Method": "MSTMM", "Material": "Ice", "Size": "N/A", "Particles": "8192", "Time": "14640", "RAM": "407 GB", "Machine": "Zaratan", "Threads": "384", "File": "water__ice_64_8192.dat"},
+        {"Method": "MSTMM", "Material": "Ice", "Size": "N/A", "Particles": "16384", "Time": "162544", "RAM": "770 GB", "Machine": "Zaratan", "Threads": "384", "File": "water__ice_64_16384.dat"},
+        
+        /* AMORPHOUS CARBON */
+        {"Method": "FaSTMM", "Material": "Amorphous Carbon", "Size": "0.1", "Particles": "1638", "Time": "2692", "RAM": "0.39 GB", "Machine": "Zaratan", "Threads": "20", "File": "am_carbon_1k_01size_10cpu_64ave_output.h5"},
+        {"Method": "FaSTMM", "Material": "Amorphous Carbon", "Size": "0.1", "Particles": "8192", "Time": "8873", "RAM": "2.9 GB", "Machine": "Zaratan", "Threads": "64", "File": "am_carbon_8k_01size_64cpu_64ave_output.h5"},
+        {"Method": "FaSTMM", "Material": "Amorphous Carbon", "Size": "0.1", "Particles": "16384", "Time": "321", "RAM": "2.8 GB", "Machine": "Zaratan", "Threads": "64", "File": "am_carbon_1k_01size_64cpu_output.h5"},
+        {"Method": "FaSTMM", "Material": "Amorphous Carbon", "Size": "0.1", "Particles": "16384", "Time": "21240", "RAM": "5.1 GB", "Machine": "Zaratan", "Threads": "64", "File": "am_carbon_16k_01size_64cpu_64ave_output.h5"},
+        {"Method": "MSTMM", "Material": "Amorphous Carbon", "Size": "N/A", "Particles": "1638", "Time": "6151", "RAM": "1.75 GB", "Machine": "Zaratan", "Threads": "1", "File": "amorphous_carbon_64_1638.dat"},
+        {"Method": "MSTMM", "Material": "Amorphous Carbon", "Size": "N/A", "Particles": "8192", "Time": "1605", "RAM": "896 GB", "Machine": "Zaratan", "Threads": "384", "File": "amorphous__carbon_64_8192.dat"},
+        {"Method": "MSTMM", "Material": "Amorphous Carbon", "Size": "N/A", "Particles": "16384", "Time": "63552", "RAM": "186 GB", "Machine": "Zaratan", "Threads": "384", "File": "amorphous__carbon_64_16384.dat"},
+
+        /* HALLEY DUST */
+        {"Method": "FaSTMM", "Material": "Halley Dust", "Size": "0.1", "Particles": "1638", "Time": "1111", "RAM": "0.37 GB", "Machine": "Zaratan", "Threads": "10", "File": "halley_dust_01size_1k_10cpu_64ave_output.h5"},
+        {"Method": "FaSTMM", "Material": "Halley Dust", "Size": "0.1", "Particles": "16384", "Time": "1111", "RAM": "3.7 GB", "Machine": "Zaratan", "Threads": "64", "File": "halley_dust_01size_16k_10cpu_64ave_output.h5"},
+        {"Method": "MSTMM", "Material": "Halley Dust", "Size": "N/A", "Particles": "1638", "Time": "5739", "RAM": "1.7 GB", "Machine": "Zaratan", "Threads": "1", "File": "halley_dust_64_1638.dat"},
+        {"Method": "MSTMM", "Material": "Halley Dust", "Size": "N/A", "Particles": "8192", "Time": "164523", "RAM": "8.03 GB", "Machine": "Zaratan", "Threads": "1", "File": "halley_dust_64_8192.dat"},
+
+        /* IRON RICH PYROXENE */
+        {"Method": "MSTMM", "Material": "Iron Rich Pyroxene", "Size": "N/A", "Particles": "8192", "Time": "1895", "RAM": "896 GB", "Machine": "Zaratan", "Threads": "384", "File": "iron_rich_pyroxene_64_8192.dat"},
+        {"Method": "MSTMM", "Material": "Iron Rich Pyroxene", "Size": "N/A", "Particles": "16384", "Time": "63758", "RAM": "186 GB", "Machine": "Zaratan", "Threads": "384", "File": "iron_rich_pyroxene_64_16384.dat"},
+        {"Method": "MSTMM", "Material": "Iron Rich Pyroxene", "Size": "N/A", "Particles": "17559", "Time": "16312", "RAM": "13.77 GB", "Machine": "Zaratan", "Threads": "200", "File": "iron_pyroxene_64_17559.dat"},
+        {"Method": "MSTMM", "Material": "Iron Rich Pyroxene", "Size": "N/A", "Particles": "23170", "Time": "43716", "RAM": "17.95 GB", "Machine": "Zaratan", "Threads": "100", "File": "iron_pyroxene_64_23170.dat"},
+        {"Method": "MSTMM", "Material": "Iron Rich Pyroxene", "Size": "N/A", "Particles": "32768", "Time": "N/A", "RAM": "N/A", "Machine": "Zaratan", "Threads": "40", "File": "iron_pyroxene_64_32768.dat"},
+        {"Method": "MSTMM", "Material": "Iron Rich Pyroxene", "Size": "N/A", "Particles": "65536", "Time": "N/A", "RAM": "N/A", "Machine": "Zaratan", "Threads": "N/A", "File": "iron_pyroxene_64_65536.dat.txt"},
+
+        /* IRON */
+        {"Method": "FaSTMM", "Material": "Iron", "Size": "0.1", "Particles": "1638", "Time": "1931", "RAM": "0.42 GB", "Machine": "Zaratan", "Threads": "20", "File": "iron_01size_1k_10cpu_64ave_output.h5"},
+        {"Method": "FaSTMM", "Material": "Iron", "Size": "0.1", "Particles": "8192", "Time": "8116", "RAM": "1.92 GB", "Machine": "Zaratan", "Threads": "64", "File": "iron_01size_8k_10cpu_64ave_output.h5"},
+        {"Method": "FaSTMM", "Material": "Iron", "Size": "0.1", "Particles": "16384", "Time": "10232", "RAM": "3.7 GB", "Machine": "Zaratan", "Threads": "64", "File": "iron_01size_16k_10cpu_64ave_output.h5"},
+        {"Method": "MSTMM", "Material": "Iron", "Size": "N/A", "Particles": "1638", "Time": "11955", "RAM": "1.75 GB", "Machine": "Zaratan", "Threads": "1", "File": "iron_64_16384.dat"},
+        {"Method": "MSTMM", "Material": "Iron", "Size": "N/A", "Particles": "8192", "Time": "192441", "RAM": "8 GB", "Machine": "Zaratan", "Threads": "1", "File": "iron_64_8192.dat"},
+        {"Method": "MSTMM", "Material": "Iron", "Size": "N/A", "Particles": "16384", "Time": "163447", "RAM": "14.45 GB", "Machine": "Zaratan", "Threads": "1", "File": "iron_64_16384.dat"},
+        
+        /* AMORPHOUS SILICATE */
+        {"Method": "MSTMM", "Material": "Amorphous Silicate", "Size": "N/A", "Particles": "8192", "Time": "2138", "RAM": "894 GB", "Machine": "Zaratan", "Threads": "384", "File": "amorphous_silicate_64_8192.dat"},
+        {"Method": "MSTMM", "Material": "Amorphous Silicate", "Size": "N/A", "Particles": "8192", "Time": "32813", "RAM": "96.7 GB", "Machine": "Zaratan", "Threads": "384", "File": "amorphous_silicate_1500_8192.dat"}
+    ];
 
     $(document).ready(function() {
-        const tableBody = $('#tableBody');
-        
-        fullData.forEach(row => {
-            const badgeClass = row.Method === 'FaSTMM' ? 'fastmm' : 'mstmm';
+        const body = $('#tableBody');
+        simData.forEach(row => {
+            const mClass = row.Method === 'FaSTMM' ? 'fastmm' : 'mstmm';
+            const fileLink = `<a href="./${row.File}" download class="file-link"><i class="bi bi-download me-1"></i>${row.File}</a>`;
             
-            tableBody.append(`
+            body.append(`
                 <tr>
-                    <td><span class="method-badge ${badgeClass}">${row.Method}</span></td>
-                    <td class="material-name">${row.Material}</td>
+                    <td><span class="method-badge ${mClass}">${row.Method}</span></td>
+                    <td class="fw-bold text-dark">${row.Material}</td>
+                    <td>${row.Size}</td>
                     <td>${row.Particles}</td>
-                    <td>${row.Time_s}</td>
-                    <td>${row.RAM_GB}</td>
+                    <td>${row.Time}</td>
+                    <td>${row.RAM}</td>
                     <td>${row.Machine}</td>
-                    <td>${row.Threads_Tasks}</td>
-                    <td>${row.Wave_Num}</td>
+                    <td>${row.Threads}</td>
+                    <td>${fileLink}</td>
                 </tr>
             `);
         });
 
-        $('#resultsTable').DataTable({
-            order: [[0, 'desc'], [1, 'asc']], // Order by Method first, then Material
-            pageLength: 25,
-            language: { searchPlaceholder: "Search any field..." }
+        $('#simTable').DataTable({ 
+            paging: false, 
+            order: [[1, 'asc']], 
+            responsive: true,
+            language: { search: "Quick Filter:" }
         });
     });
 </script>
